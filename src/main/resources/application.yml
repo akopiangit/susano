@@ -1,0 +1,5 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://root:123@localhost:27017/susano?authMechanism=SCRAM-SHA-1&authSource=admin
+      auto-index-creation: true
