@@ -9,10 +9,11 @@ import kotlin.Exception
 
 
 @RestControllerAdvice
+//TODO переписать на webflux
 class ControllerExceptionHandler {
 
-    @ExceptionHandler(value = [Exception::class])
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    fun baseExceptionHandler(ex: Exception, request: WebRequest?): String = ex.message ?: "Internal server error"
+//    @ExceptionHandler(value = [Exception::class])
+//    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+//    fun baseExceptionHandler(ex: Exception, request: WebRequest?): String = ex.message ?: "Internal server error"
 
 }
