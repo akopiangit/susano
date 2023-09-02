@@ -17,6 +17,7 @@ class CacheConfiguration {
 
     companion object {
         const val PROFILE_LIKE_CACHE_NAME = "profile-like"
+        const val CACHEABLE_EXAMPLE_CACHE_NAME = "example"
     }
 
     @Bean
@@ -27,6 +28,12 @@ class CacheConfiguration {
                     PROFILE_LIKE_CACHE_NAME,
                     RedisCacheConfiguration.defaultCacheConfig()
                         .entryTtl(Duration.ofMinutes(10))
+                        .serializeKeysWith(SerializationPair.fromSerializer(RedisSerializer.string()))
+                        .serializeValuesWith(SerializationPair.fromSerializer(RedisSerializer.json())))
+                .withCacheConfiguration(
+                    PROFILE_LIKE_CACHE_NAME,
+                    RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(60))
                         .serializeKeysWith(SerializationPair.fromSerializer(RedisSerializer.string()))
                         .serializeValuesWith(SerializationPair.fromSerializer(RedisSerializer.json())))
         }

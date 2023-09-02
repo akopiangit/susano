@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import ru.akopian.susano.config.CacheConfiguration.Companion.CACHEABLE_EXAMPLE_CACHE_NAME
 import ru.akopian.susano.config.CacheConfiguration.Companion.PROFILE_LIKE_CACHE_NAME
 import ru.akopian.susano.model.dto.ProfileDto
 import ru.akopian.susano.model.mapper.ProfileMapper.Companion.fillProfile
@@ -30,6 +31,13 @@ class ProfileController(
         private val log = getLogger(ProfileController::class.java)
     }
 
+    @Cacheable(key = "#phone + #name", condition = "#phone.length() > 10", cacheNames = [CACHEABLE_EXAMPLE_CACHE_NAME])
+    @GetMapping("/cached-endpoint")
+    fun cachingExample(@RequestParam phone: String, @RequestParam name: String) : String {
+        log.info("it was real call, not cached response")
+        return "phone : $phone, name : $name"
+    }
+
     @GetMapping
     fun find(@RequestParam id: String): Mono<ProfileDto> =
         profileRepository.findById(id)
@@ -37,12 +45,10 @@ class ProfileController(
             .switchIfEmpty(Mono.error(NotFoundException("not found profile with id = $id")))
 
     @GetMapping("/like")
-    @Cacheable(key = "#like", cacheNames = [PROFILE_LIKE_CACHE_NAME])
-    fun findByNameLike(@RequestParam like: String): Mono<MutableList<ProfileDto>> {
+    fun findByNameLike(@RequestParam like: String): Flux<ProfileDto> {
         log.info("Mongo was used!")
         return profileRepository.findByNameContaining(like, PageRequest.of(0, 50))
-            .map { mapProfile(it) }.collectList().
-//            //кажется для веблафкса это все ломает, потом убрать
+            .map { mapProfile(it) }
     }
 
     @PostMapping
