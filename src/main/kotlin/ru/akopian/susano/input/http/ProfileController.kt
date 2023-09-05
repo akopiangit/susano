@@ -18,13 +18,15 @@ import ru.akopian.susano.model.mapper.ProfileMapper.Companion.mapProfile
 import ru.akopian.susano.model.mapper.ProfileMapper.Companion.newProfile
 import ru.akopian.susano.model.mongo.Profile
 import ru.akopian.susano.output.exception.NotFoundException
+import ru.akopian.susano.persistance.mongo.ProfileCoroutineRepository
 import ru.akopian.susano.persistance.mongo.ProfileRepository
 
 @RestController
 @RequestMapping("/profile")
 @EnableScheduling
 class ProfileController(
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val coroutineRepository: ProfileCoroutineRepository
 ) {
 
     companion object {
@@ -43,6 +45,12 @@ class ProfileController(
         profileRepository.findById(id)
             .map { mapProfile(it) }
             .switchIfEmpty(Mono.error(NotFoundException("not found profile with id = $id")))
+
+    @GetMapping("/async")
+    suspend fun findAsync(@RequestParam id: String): ProfileDto =
+        mapProfile(
+            coroutineRepository.findOne(id)
+        )
 
     @GetMapping("/like")
     fun findByNameLike(@RequestParam like: String): Flux<ProfileDto> {
