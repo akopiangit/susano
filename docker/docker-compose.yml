@@ -1,0 +1,44 @@
+version: '2.1'
+
+services:
+
+  susano:
+    container_name: susano
+    build:
+      context: ./..
+      dockerfile: docker/volumes/susano/Dockerfile
+    volumes:
+      - ./volumes/resources:/tmp/volumes/resources
+    ports:
+      - 8080:8080
+    environment:
+      - DATABASE_URL=mongodb://mongodb:27017/susano?authMechanism=SCRAM-SHA-1&authSource=admin
+      - APP_LOGGING_LEVEL=debug
+    depends_on:
+      - mongodb
+      - web
+
+  mongodb:
+    container_name: mongodb
+    image: mongodb:latest
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=123
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./volumes/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  web:
+    container_name: web-proxy
+    image: nginx
+    volumes:
+      - ./volumes/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8084:8084
